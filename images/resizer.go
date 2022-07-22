@@ -1,9 +1,15 @@
 package images
 
 import (
-	"image"
 	"io"
+	"log"
 )
+
+func init() {
+	register(defaultStrategy, func(o ResizeOptions) Resizer {
+		return imagingResizer{o}
+	})
+}
 
 type ResizeOptions struct {
 	MaxSize uint64
@@ -11,9 +17,17 @@ type ResizeOptions struct {
 }
 
 type Resizer interface {
-	Resize(img image.Image, w io.Writer) error
+	Resize(r io.Reader, w io.Writer) error
+}
+
+var strategies = make(map[string]func(o ResizeOptions) Resizer)
+var defaultStrategy = "imaging"
+
+func register(name string, factory func(o ResizeOptions) Resizer) {
+	strategies[name] = factory
 }
 
 func NewResizer(o ResizeOptions) Resizer {
-	return &imagingResizer{o}
+	log.Printf("Using %s strategy", defaultStrategy)
+	return strategies[defaultStrategy](o)
 }

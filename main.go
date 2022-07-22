@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"image/jpeg"
 	"io"
 	"io/fs"
 	"log"
@@ -120,14 +119,8 @@ func (d resizer) Resize(ctx context.Context, imagePaths []string, w io.Writer) e
 			//}
 			//beforeSize := stat.Size()
 
-			img, err := jpeg.Decode(f)
-			if err != nil {
-				//log.Printf("cannot decode as jpeg %q: %v", filename, err)
-				return
-			}
-
 			var buf bytes.Buffer
-			err = d.Resizer.Resize(img, &buf)
+			err = d.Resizer.Resize(f, &buf)
 			if err != nil {
 				//log.Printf("cannot resize %q: %v", filename, err)
 				return
