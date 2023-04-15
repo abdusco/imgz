@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   GIT_TAG:
-    sh: git describe --tags HEAD || echo v0.0.0
+    sh: git describe --tags HEAD 2>/dev/null || echo v0.0.0
   GIT_COMMIT:
     sh: git rev-parse --short HEAD || echo unknown
   LDFLAGS: >-
@@ -13,4 +13,11 @@ vars:
 tasks:
   build:
     cmds:
-      - go build -v github.com/abdusco/imgz/cmd/imgz
+      - go build -v -ldflags "{{.LDFLAGS}}" github.com/abdusco/imgz/cmd/imgz
+  deploy:
+    env:
+      GOOS: linux
+      GOARCH: amd64
+    cmds:
+      - go build -v -ldflags "{{.LDFLAGS}}" -o ./out/imgz ./cmd/imgz/
+      - rsync -rvPa ./out/imgz $REMOTE_SERVER:~/.bin/

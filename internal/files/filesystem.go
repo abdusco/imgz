@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,10 +32,13 @@ func (f FlatteningPathNormalizer) Normalize(path string) (string, error) {
 	return flat, nil
 }
 
-func FindImages(root string) ([]string, error) {
+func FindImages(ctx context.Context, root string) ([]string, error) {
 	var images []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			return err
+		}
+		if err := ctx.Err(); err != nil {
 			return err
 		}
 		if info.IsDir() {
