@@ -1,0 +1,16 @@
+version: '3'
+
+vars:
+  GIT_TAG:
+    sh: git describe --tags HEAD || echo v0.0.0
+  GIT_COMMIT:
+    sh: git rev-parse --short HEAD || echo unknown
+  LDFLAGS: >-
+    -X github.com/abdusco/imgz/internal/version.CommitHash={{.GIT_COMMIT}}
+    -X github.com/abdusco/imgz/internal/version.Version={{.GIT_TAG}}
+    -X github.com/abdusco/imgz/internal/version.BuildDate={{dateInZone "2006-01-02T15:04:05Z07:00" (now) "UTC"}}
+
+tasks:
+  build:
+    cmds:
+      - go build -v github.com/abdusco/imgz/cmd/imgz

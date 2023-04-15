@@ -1,6 +1,7 @@
-package images
+package resizer
 
 import (
+	"context"
 	"fmt"
 	"image/jpeg"
 	"io"
@@ -9,10 +10,10 @@ import (
 )
 
 type imagingResizer struct {
-	options ResizeOptions
+	options Options
 }
 
-func (i imagingResizer) Resize(r io.Reader, w io.Writer) error {
+func (i imagingResizer) Resize(_ context.Context, r io.Reader, w io.Writer) error {
 	img, err := jpeg.Decode(r)
 	if err != nil {
 		return fmt.Errorf("failed to decode jpeg: %w", err)
