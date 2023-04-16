@@ -75,7 +75,7 @@ func (c resizeDirCmd) Run() error {
 		zw := zip.NewWriter(zf)
 
 		for _, imagePath := range images {
-			slog.Debug("resizing image", "path", imagePath)
+			slog.Debug("resizing image", "filename", filepath.Base(imagePath))
 			f, err := os.Open(imagePath)
 			if err != nil {
 				slog.Error("failed to open image", "path", imagePath, "error", err)
