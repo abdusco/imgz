@@ -43,17 +43,20 @@ type resizeDirCmd struct {
 	OutputDir  string   `short:"o" help:"Dir to save zip files" required:""`
 	MaxSize    uint     `default:"5000" help:"Max side length of resized images"`
 	Quality    uint     `default:"75" help:"JPEG quality"`
+	Clean      bool     `help:"Delete source dirs after resizing"`
 }
 
 func (c resizeDirCmd) Run() error {
+	ctx := context.Background()
 	res := resizer.New(resizer.Options{
 		MaxSize: c.MaxSize,
 		Quality: c.Quality,
 	})
 
-	ctx := context.Background()
-
+	var dirsToRemove []string
 	for _, dir := range c.SourceDirs {
+		norm := files.NewFlattener(dir)
+
 		images, err := files.FindImages(ctx, dir)
 		if err != nil {
 			return fmt.Errorf("failed to find images in %q: %w", dir, err)
@@ -78,16 +81,35 @@ func (c resizeDirCmd) Run() error {
 				slog.Error("failed to open image", "path", imagePath, "error", err)
 				continue
 			}
-			w, err := zw.Create(filepath.Base(imagePath))
+
+			archivePath, err := norm.Normalize(imagePath)
+			if err != nil {
+				return fmt.Errorf("failed to normalize archive path: %w", err)
+			}
+
+			w, err := zw.Create(archivePath)
 			if err != nil {
 				return fmt.Errorf("failed to create zip file entry: %w", err)
 			}
+
 			if err := res.Resize(ctx, f, w); err != nil {
 				return fmt.Errorf("failed to resize image: %w", err)
 			}
+
 			f.Close()
 		}
 		zw.Close()
+		dirsToRemove = append(dirsToRemove, dir)
+	}
+
+	if c.Clean {
+		for _, dir := range dirsToRemove {
+			slog.Debug("removing dir", "dir", dir)
+			if err := os.RemoveAll(dir); err != nil {
+				slog.Error("failed to remove dir", "dir", dir, "error", err)
+				continue
+			}
+		}
 	}
 
 	return nil

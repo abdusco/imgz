@@ -19,16 +19,20 @@ func (n NoopNormalizer) Normalize(path string) (string, error) {
 }
 
 type FlatteningPathNormalizer struct {
-	Root      string
-	Separator string
+	root      string
+	separator string
+}
+
+func NewFlattener(root string) FlatteningPathNormalizer {
+	return FlatteningPathNormalizer{root: root, separator: ";"}
 }
 
 func (f FlatteningPathNormalizer) Normalize(path string) (string, error) {
-	rel, err := filepath.Rel(f.Root, path)
+	rel, err := filepath.Rel(f.root, path)
 	if err != nil {
 		return "", err
 	}
-	flat := strings.Replace(rel, string(filepath.Separator), f.Separator, -1)
+	flat := strings.Replace(rel, string(filepath.Separator), f.separator, -1)
 	return flat, nil
 }
 
