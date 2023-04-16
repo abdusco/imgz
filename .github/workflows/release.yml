@@ -1,0 +1,26 @@
+name: release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: wangyoucao577/go-release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          binary_name: "imgz"
+          project_path: "./cmd/imgz"
+          asset_name: imgz-${{ matrix.goos }}-${{ matrix.goarch }}
+          pre_command: export CGO_ENABLED=0
+          extra_files: LICENSE.txt README.md
