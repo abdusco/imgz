@@ -76,6 +76,8 @@ func (c resizeDirCmd) Run() error {
 			}
 		}
 
+		slog.Debug("processing dir", "dir", dir, "total_images", len(images))
+
 		zf, err := os.Create(zipPath)
 		if err != nil {
 			return fmt.Errorf("failed to create zip file: %w", err)
