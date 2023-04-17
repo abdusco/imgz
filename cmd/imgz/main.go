@@ -44,6 +44,7 @@ type resizeDirCmd struct {
 	MaxSize    uint     `default:"5000" help:"Max side length of resized images"`
 	Quality    uint     `default:"75" help:"JPEG quality"`
 	Clean      bool     `help:"Delete source dirs after resizing"`
+	SkipDone   bool     `help:"Skip processing a dir if there's a matching ZIP file in output dir'"`
 }
 
 func (c resizeDirCmd) Run() error {
@@ -68,6 +69,13 @@ func (c resizeDirCmd) Run() error {
 		}
 
 		zipPath := filepath.Join(c.OutputDir, fmt.Sprintf("%s.zip", filepath.Base(dir)))
+		if c.SkipDone {
+			if _, err := os.Stat(zipPath); err == nil {
+				slog.Info("dir has already been processed, skipping", "dir", dir, "zip_path", zipPath)
+				continue
+			}
+		}
+
 		zf, err := os.Create(zipPath)
 		if err != nil {
 			return fmt.Errorf("failed to create zip file: %w", err)
