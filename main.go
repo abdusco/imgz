@@ -10,11 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/abdusco/imgz/resizer"
 	"github.com/alecthomas/kong"
 
 	"github.com/abdusco/imgz/internal/files"
-	"github.com/abdusco/imgz/internal/version"
-	"github.com/abdusco/imgz/pkg/resizer"
 )
 
 func main() {
@@ -27,7 +26,7 @@ func main() {
 	cli := kong.Parse(
 		&cliApp,
 		kong.Name("imgz"),
-		kong.Vars{"version": version.String()},
+		kong.Vars{"version": Version()},
 	)
 	level := slog.LevelInfo
 	if cliApp.Debug {

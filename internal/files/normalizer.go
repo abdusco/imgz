@@ -5,10 +5,6 @@ import (
 	"strings"
 )
 
-type Normalizer interface {
-	Normalize(path string) (string, error)
-}
-
 type NoopNormalizer struct {
 }
 
