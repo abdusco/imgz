@@ -3,8 +3,7 @@ package resizer
 import (
 	"context"
 	"io"
-
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func init() {

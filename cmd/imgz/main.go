@@ -5,12 +5,12 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/alecthomas/kong"
-	"golang.org/x/exp/slog"
 
 	"github.com/abdusco/imgz/internal/files"
 	"github.com/abdusco/imgz/internal/version"
@@ -29,9 +29,11 @@ func main() {
 		kong.Name("imgz"),
 		kong.Vars{"version": version.String()},
 	)
+	level := slog.LevelInfo
 	if cliApp.Debug {
-		slog.SetDefault(slog.New(slog.HandlerOptions{Level: slog.LevelDebug}.NewTextHandler(os.Stderr)))
+		level = slog.LevelDebug
 	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level})))
 	if err := cli.Run(); err != nil {
 		slog.Error("exit with error", "error", err)
 		os.Exit(1)
@@ -166,7 +168,7 @@ func (c resizeCmd) Run() error {
 	if c.Output == "-" {
 		w = os.Stdout
 		slog.Info("saving to stdout")
-	} else {
+	} else if c.Output == "" {
 		ext := ".jpg"
 		basename := strings.TrimSuffix(filepath.Base(c.ImagePath), filepath.Ext(c.ImagePath))
 		outputPath := filepath.Join(filepath.Dir(c.ImagePath), "resized", basename+ext)
@@ -189,6 +191,25 @@ func (c resizeCmd) Run() error {
 		}
 		defer f.Close()
 		slog.Debug("will save to file", "path", outputPath)
+		w = f
+	} else {
+		var err error
+		c.Output, err = filepath.Abs(c.Output)
+		if err != nil {
+			return fmt.Errorf("failed to resolve output path: %w", err)
+		}
+
+		dir := filepath.Dir(c.Output)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("failed to create output directory at %q: %w", dir, err)
+		}
+
+		f, err := os.Create(c.Output)
+		if err != nil {
+			return fmt.Errorf("failed to open file: %w", err)
+		}
+		defer f.Close()
+		slog.Debug("will save to file", "path", c.Output)
 		w = f
 	}
 

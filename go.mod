@@ -1,13 +1,10 @@
 module github.com/abdusco/imgz
 
-go 1.20
+go 1.24
 
 require (
-	github.com/alecthomas/kong v0.7.1
+	github.com/alecthomas/kong v1.12.1
 	github.com/disintegration/imaging v1.6.2
 )
 
-require (
-	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
-	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
-)
+require golang.org/x/image v0.29.0 // indirect

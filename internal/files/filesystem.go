@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+func isImage(path string) bool {
+	ext := strings.ToLower(filepath.Ext(path))
+	return ext == ".jpg" || ext == ".jpeg" || ext == ".png"
+}
+
 func FindImages(ctx context.Context, root string) ([]string, error) {
 	var images []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -19,8 +24,7 @@ func FindImages(ctx context.Context, root string) ([]string, error) {
 		if info.IsDir() {
 			return nil
 		}
-		ext := strings.ToLower(filepath.Ext(path))
-		if ext == ".jpg" || ext == ".jpeg" {
+		if isImage(path) {
 			images = append(images, path)
 		}
 		return nil
