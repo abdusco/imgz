@@ -8,10 +8,6 @@ import (
 var version = "dev"
 
 func Version() string {
-	if version == "dev" {
-		return version
-	}
-
 	commit := "unknown"
 	date := "unknown"
 	if info, ok := debug.ReadBuildInfo(); ok {
@@ -25,5 +21,5 @@ func Version() string {
 		}
 	}
 
-	return fmt.Sprintf("%s %s %s", version, commit, date)
+	return fmt.Sprintf("%s-%s @ %s", version, commit, date)
 }
